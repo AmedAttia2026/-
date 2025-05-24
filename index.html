@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أسئلة حقوق الإنسان</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #F8F9FA; /* Page Background */
+            direction: rtl; /* Right-to-left for Arabic */
+            text-align: right;
+        }
+        .header-bg {
+            background-color: #FF6B6B; /* Lively Coral */
+        }
+        .nav-button {
+            background-color: #4ECDC4; /* Turquoise Blue */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .nav-button:hover {
+            background-color: #3AAFA9; /* Darker Turquoise */
+        }
+        .nav-button.active {
+            background-color: #F9D423; /* Sunny Yellow */
+            color: #3A3A3A; /* Dark Gray */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .card {
+            background-color: #FFFFFF; /* Card Background */
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+        }
+        .question-text {
+            font-size: 1.125rem; /* lg */
+            font-weight: 600; /* semibold */
+            color: #3A3A3A; /* Dark Gray */
+            margin-bottom: 1rem;
+        }
+        .answer-button, .check-all-button {
+            background-color: #FF6B6B; /* Lively Coral */
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 1rem;
+        }
+        .answer-button:hover, .check-all-button:hover {
+            background-color: #E05A5A; /* Darker Lively Coral */
+        }
+        .answer-text {
+            color: #4ECDC4; /* Turquoise Blue */
+            font-weight: 700; /* bold */
+            margin-top: 0.75rem;
+            display: none; /* Hidden by default */
+        }
+        .mcq-option {
+            margin-bottom: 0.5rem;
+        }
+        .mcq-result {
+            margin-top: 1rem;
+            font-weight: 700;
+            color: #3A3A3A;
+            font-size: 1.5rem; /* Make score display larger */
+        }
+        .correct-answer-highlight {
+            color: #059669; /* Green-700 */
+        }
+        .incorrect-answer-highlight {
+            color: #DC2626; /* Red-700 */
+        }
+        .question-feedback {
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <header class="header-bg text-white p-6 shadow-md">
+        <div class="container mx-auto text-center">
+            <h1 class="text-3xl md:text-4xl font-bold">أسئلة في مادة حقوق الإنسان</h1>
+            <p class="mt-2 text-lg">دليل تفاعلي للأسئلة والإجابات</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+        <nav class="flex flex-wrap justify-center gap-4 mb-8">
+            <button id="fill-in-blanks-tab" class="nav-button active">أكمل ما يلي</button>
+            <button id="multiple-choice-tab" class="nav-button">اختيار من متعدد</button>
+            <button id="true-false-tab" class="nav-button">صواب وخطأ</button>
+        </nav>
+
+        <section id="fill-in-blanks-section" class="question-section">
+            <h2 class="text-2xl font-bold mb-6 text-gray-700">الجزء الأول: أكمل ما يلي</h2>
+            <p class="mb-6 text-gray-600">في هذا القسم، ستجد أسئلة تتطلب منك إكمال الفراغات. حاول الإجابة أولاً ثم اضغط على "عرض الإجابة" لتكشف عن الحل الصحيح.</p>
+            <div id="fill-in-blanks-container"></div>
+        </section>
+
+        <section id="multiple-choice-section" class="question-section hidden">
+            <h2 class="text-2xl font-bold mb-6 text-gray-700">الجزء الثاني: أسئلة الاختيار من المتعدد</h2>
+            <p class="mb-6 text-gray-600">اختر الإجابة الصحيحة من بين الخيارات المتاحة لكل سؤال. يمكنك الكشف عن الإجابة الفردية أو التحقق من نتيجتك الكلية.</p>
+            <div id="multiple-choice-container"></div>
+            <button id="check-all-mcq" class="check-all-button">تحقق من جميع الإجابات</button>
+            <div id="mcq-score-display" class="mcq-result mt-4 text-center"></div>
+        </section>
+
+        <section id="true-false-section" class="question-section hidden">
+            <h2 class="text-2xl font-bold mb-6 text-gray-700">الجزء الثالث: أسئلة الصواب والخطأ</h2>
+            <p class="mb-6 text-gray-600">اقرأ العبارة جيداً ثم حدد ما إذا كانت صحيحة أم خاطئة. يمكنك الكشف عن الإجابة الفردية أو التحقق من نتيجتك الكلية.</p>
+            <div id="true-false-container"></div>
+            <button id="check-all-tf" class="check-all-button">تحقق من جميع الإجابات</button>
+            <div id="tf-score-display" class="mcq-result mt-4 text-center"></div>
+        </section>
+
+        <footer class="text-center mt-12 py-6 border-t border-gray-300">
+            <p class="text-gray-600">&copy; 2024 حقوق الإنسان. جميع الحقوق محفوظة.</p>
+            <p class="text-sm text-gray-500">البيانات المقدمة هي لأغراض توضيحية وتعليمية فقط.</p>
+        </footer>
+
+    </main>
+
+    <script>
+        const fillInTheBlanksData = [
+            { q: "تمثل الدساتير إحدى أهم المصادر......... لحقوق الإنسان.", a: "الوطنية" },
+            { q: "يندرج حق الإنسان في الضمان الاجتماعي ضمن حقوق الإنسان ......... .", a: "الاقتصادية والاجتماعية" },
+            { q: "محكمة تمثل الجهاز القضائي الرئيسي للأمم المتحدة، تم إنشاؤها عام ١٩٤٥ هي....... .", a: "محكمة العدل الدولية" },
+            { q: "يعتبر الميثاق العربي لحقوق الإنسان من المصادر ..... لحقوق الإنسان.", a: "الإقليمية" },
+            { q: "تمثل منظمة مراقبة حقوق الإنسان Human Rights Watch\" إحدى المنظمات ... العاملة في مجال حماية حقوق الإنسان.", a: "غير الحكومية" },
+            { q: "طائفة من حقوق الإنسان تقتصر على مواطني الدولة فقط دون الأجانب هي ...... .", a: "الحقوق السياسية" },
+            { q: "عقوبة مالية أصلية تمثل احدى الجزاءات الجنائية هي........ .", a: "الغرامة" },
+            { q: "يمثل الميثاق الإفريقي لحقوق ورفاهية الطفل مصدر ..... من مصادر حقوق الإنسان.", a: "إقليمي" },
+            { q: "يندرج حق الإنسان في سلامة الجسد وعدم التعذيب ضمن حقوق الإنسان ....... .", a: "المدنية" },
+            { q: "يعتبر جزاء الإنذار أحد صور الجزاء ........ .", a: "الإداري أو التأديبي" },
+            { q: "تمثل الجمعية العامة للامم المتحدة إحدى الآليات .... في مجال حماية حقوق الإنسان.", a: "العامة" },
+            // تم تعديل السؤال رقم 12 لإزالة الإجابة من نص السؤال
+            { q: "تسمى المواثيق التي تخاطب منطقة جغرافية أو جماعة محددة تجمعها مصالح وروابط مشتركة مصادر ... لحقوق الإنسان.", a: "اقليمية" }, 
+            { q: "دولة عربية صدقت على النظام الأساسي للمحكمة الجنائية الدولية هي ( جيبوتي فلسطين الاردن جزر القمر تونس", a: "الأردن" },
+            { q: "يندرج حق الإنسان في الحرية ضمن حقوق الإنسان ....... .", a: "المدنية" },
+            { q: "محكمة دولية تختص بمحاكمة القادة والعسكريين الذين يرتكبون جرائم حرب او جرائم الإبادة الجماعية هي..... .", a: "المحكمة الجنائية الدولية" },
+            { q: "تعتبر التشريعات التي تصدرها الدول من المصادر ....... لحقوق الإنسان.", a: "الوطنية" },
+            { q: "يمثل المجلس الاقتصادي والاجتماعي إحدى الآليات الدولية ... في مجال حماية حقوق الإنسان...", a: "العامة" },
+            { q: "يمثل المجلس القومي لحقوق الإنسان في مصر إحدى الهيئات ...... العاملة في مجال حماية وتعزيز حقوق الإنسان.", a: "الحكومية" },
+            { q: "تمثل المنظمة المصرية لحقوق الإنسان إحدى المنظمات ..... العاملة في مجال حماية وتعزيز حقوق الإنسان.", a: "غير الحكومية" },
+            { q: "يندرج حق الإنسان في التعليم ضمن حقوق الإنسان ......... .", a: "الاقتصادية والاجتماعية" },
+            { q: "يعتبر التعويض أحد صور الجزاء ....... .", a: "المدني" },
+            { q: "تمثل المفوضية السامية لحقوق الإنسان إحدى الآليات العالمية ........ في مجال حماية حقوق الإنسان.", a: "المتخصصة" },
+            { q: "تعتبر الالواح الاثنى عشر من مظاهر الاهتمام بحقوق الإنسان في بلاد ...... .", a: "الرومان" },
+            { q: "يعتبر عنصر .... هو العنصر الأساسي في عقد العمل الفردي، وهو الذي يميزه عن غيره من العقود الأخرى.", a: "التبعية" },
+            { q: "يندرج حق الإنسان في العمل ضمن حقوق الإنسان ......... .", a: "الاقتصادية والاجتماعية" },
+            { q: "دولة عربية لم تصدق على النظام الأساسي للمحكمة الجنائية الدولية هي ....... .", a: "السودان (أو أي دولة غير التي صدقت)" },
+            { q: "يتم كتابة عقد العمل الفردي من عدد...... من النسخ.", a: "ثلاث" },
+            { q: "يعبتر صدور قانون أشننونا من مظاهر الاهتمام بحقوق الإنسان في بلاد ..... .", a: "الرافدين او العراق أو ما بين النهرين" },
+            { q: "يعتبر إعلان القاهرة لحقوق الإنسان في الإسلام لسنة ۱۹۹۰ من المصادر .... لحقوق الإنسان.", a: "الاقليمية" },
+            { q: "يتألف الإعلان العالمي لحقوق الإنسان من ديباجة وعدد............... مادة.", a: "30" },
+            { q: "تندرج المحاكم القضائية التي توجد بكل دولة ضمن الآليات......... لحماية حقوق الإنسان .", a: "الوطنية" },
+            { q: "يمثل التنفيذ بطريق التعويض إحدى صور الجزاء .... .", a: "المدني" },
+            { q: "وثيقة قانونية وحيدة تصدر باستفتاء شعبي هي.......... .", a: "الدستور" },
+            { q: "يعد الميثاق الاوربي الاجتماعي لسنة ١٩٦١ من مصادر حقوق الإنسان....... .", a: "الاقليمية" },
+            { q: "يعتبر صدور قانون صولون من مظاهر حماية حقوق الإنسان في بلاد .. .", a: "الاغريق أو اليونان" },
+            { q: "تمثل منظمة العفو الدولية إحدى المنظمات العالمية ... العاملة في مجال حماية حقوق الإنسان.", a: "غير الحكومية" },
+            { q: "يندرج حق الإنسان في العمل ضمن حقوق الإنسان ............ .", a: "الاقتصادية والاجتماعية" },
+        ];
+
+        const multipleChoiceData = [
+            {
+                q: "تمثل الجمعية العامة للامم المتحدة إحدى الآليات في مجال حماية حقوق الإنسان.",
+                options: ["المتخصصة", "العامة", "الإقليمية", "الوطنية"],
+                correct: "العامة"
+            },
+            {
+                q: "تسمى المواثيق التي تخاطب منطقة جغرافية أو جماعة محددة تجمعها مصالح وروابط مشترمة مصادر ...... لحقوق الإنسان.",
+                options: ["اقليمية", "تاريخية", "جغرافية", "عالمية"],
+                correct: "اقليمية"
+            },
+            {
+                q: "تمثل المحاكم الدستورية إحدى الآليات في مجال حماية حقوق الإنسان.",
+                options: ["المتخصصة", "العامة", "الإقليمية", "الوطنية"],
+                correct: "الوطنية"
+            },
+            {
+                q: "تعتبر منظمة مراقبة حقوق الإنسان Human Rights Watch\" إحدى المنظمات العاملة في مجال حماية حقوق الإنسان.",
+                options: ["العامة", "غير الحكومية", "الإقليمية", "الحكومية"],
+                correct: "غير الحكومية"
+            },
+            {
+                q: "تمثل محكمة العدل الدولية إحدى الآليات في مجال حماية حقوق الإنسان.",
+                options: ["العامة", "المتخصصة", "الإقليمية", "الوطنية"],
+                correct: "العامة"
+            },
+            {
+                q: "تعتبر الالواح الاثنى عشر من مظاهر الاهتمام بحقوق الإنسان في بلاد",
+                options: ["الرافدين", "اليونان", "الرومان", "مصر القديمة"],
+                correct: "الرومان"
+            },
+            {
+                q: "تمثل الغرامة المالية إحدى الجزاءات ..........",
+                options: ["المدنية", "التأديبية", "الجنائية", "البدنية"],
+                correct: "الجنائية"
+            },
+            {
+                q: "دولة عربية صدقت على النظام الأساسي للمحكمة الجنائية الدولية هي ........... ..",
+                options: ["مصر", "المغرب", "الجزائر", "الأردن"],
+                correct: "الأردن"
+            }
+        ];
+
+        const trueFalseData = [
+            { q: "يقع المقر الرئيسي للمنظمة العربية لحقوق الإنسان في تونس .", a: false },
+            { q: "تعتبر مصر من أولى الدول التي قامت بالتصديق على الميثاق العربي لحقوق الانسان.", a: false },
+            { q: "تمثل المفوضية السامية لحقوق الإنسان إحدى الآليات العالمية العامة في مجال حماية حقوق الإنسان.", a: false },
+            { q: "أصدر مجلس الأمن التابع لهيئة الأمم المتحدة الاعلان العالمي لحقوق الإنسان عام ١٩٤٨.", a: false },
+            { q: "يمثل العهد الدولي لل حقوق المدنية والسياسية سنة ١٩٦٦ اتفاقية دولية ملزمة الأطرافها.", a: true },
+            { q: "يندرج الحق في الانتخاب ضمن حقوق الإنسان السياسية.", a: true },
+            { q: "تضمن ميثاق هيئة الأمم المتحدة العديد من الأحكام التي تتعلق بحقوق الإنسان وحماية حرياته.", a: true },
+            { q: "تعتبر مصر من الدول التي قامت بالتصديق على الميثاق الإفريقي لحقوق الانسان والشعوب .", a: true },
+            { q: "يقع المقر الرئيسي للمنظمة العربية لحقوق الإنسان في القاهرة .", a: true },
+            { q: "تمثل المفوضية السامية لحقوق الإنسان إحدى الآليات العالمية المتخصصة في مجال حماية حقوق الإنسان.", a: true },
+            { q: "أصدرت الجمعية العامة التابعة لهيئة الأمم المتحدة الاعلان العالمي لحقوق الإنسان عام ١٩٤٨.", a: true },
+            { q: "يمثل العهد الدولي للحقوق المدنية والسياسية سنة ١٩٦٦ مجرد توصيات غير ملزمة الأطرافها .", a: false },
+            { q: "يندرج الحق في التعليم ضمن حقوق الإنسان السياسية.", a: false },
+            { q: "تضمن ميثاق عصبة الأمم العديد من الأحكام التي تتعلق بحقوق الإنسان وحماية حرياته .", a: false },
+            { q: "يمثل القانون في مصر الوثيقة الأسمى والأعلى في إطار النظام القانوني المصري.", a: false },
+            { q: "تسري أحكام قانون العمل المصري على العلاقة بين الحكومة وموظفيها .", a: false },
+            { q: "يمثل مجلس الأمن جهاز التداول ووضع السياسات والتمثيل في منظمة الأمم المتحدة.", a: false },
+            { q: "تضمن قانون صولون بعض الحقوق الإرثية للطفل.", a: false }, // الإجابة: خطأ (تم التعديل سابقًا)
+            { q: "تتمتع الدعاوى العمالية بالإعفاء من الرسوم القضائية، ورسوم الدمغة .", a: true },
+            { q: "أصدرت الجمعية العامة التابعة لهيئة الأمم المتحدة الاعلان العالمي لحقوق الإنسان عام ١٩٤٨.", a: true },
+            { q: "يندرج الحق في التنقل ضمن حقوق الإنسان المدنية.", a: true },
+            { q: "كفل الدستور المصري لكل مواطن الحق في ممارسة الرياضة .", a: true },
+            { q: "تضمن قانون صولون بعض الحقوق الإرثية للمرأة.", a: true },
+            { q: "لا تسري أحكام قانون العمل المصري على العلاقة بين الحكومة وموظفيها .", a: true },
+            { q: "يمثل الدستور في مصر الوثيقة الأسمى والأعلى في إطار النظام القانوني المصري.", a: true },
+            { q: "أصدر المجلس الاقتصادي والاجتماعي التابع للأمم المتحدة الاعلان العالمي لحقوق الإنسان عام ١٩٤٨.", a: false },
+            { q: "تفرض رسوم قضائية، ورسوم دمغة على الدعاوى العمالية التي يقيمها العامل .", a: false },
+            { q: "يندرج الحق في التنقل ضمن حقوق الإنسان السياسية.", a: false },
+            { q: "قرر المجلس الاعلى لدول الحلفاء في عام ۱۹۲۰ في مؤتمر سان ريمو، وضع فلسطين تحت الانتداب البريطاني", a: true },
+            { q: "يعتبر نظام الانتداب الدولي نوع من الاحتلال المقنع ابتدعته عصبة الأمم.", a: true },
+            { q: "يتكون مجلس الأمن الدولي من خمسة عشر عضوا، خمسة دائمون، وعشرة غير دائمين.", a: true },
+            { q: "تستلزم حقوق الإنسان الثقافية تمكينه من التمتع بفوائد التقدم العلمي، وحماية إنتاجه الفني أو العلمي أو الأدبي", a: true },
+            { q: "خلا الميثاق الافريقي لحقوق الإنسان والشعوب لسنة ۱۹۸۱ من أي تنظيم لواجبات الفرد تجاه أسرته ومجتمعه ودولته .", a: false },
+            { q: "وضعت القدس تحت الوصاية الدولية، بقرار الجمعية العامة للامم المتحدة رقم ١۸۱ لسنة ١٩٤٧.", a: true },
+            { q: "تمثل الجمعية العامة جهاز التداول ووضع السياسات والتمثيل في منظمة الأمم المتحدة.", a: true },
+            { q: "صدقت مصر على العهدين الدوليين لحقوق الإنسان لعام ١٩٦٦.", a: true },
+            { q: "تعتبر الشريعة الاسلامية إحدى مصادر حقوق الإنسان", a: true },
+            { q: "يقع باطلا أي اتفاق يخالف أحكام قانون العمل حتى ولو كان أكثر سخاء للعامل .", a: false },
+            { q: "تمثل كتابة عقد العمل الفردي إحدى عناصر عقد العمل التي لا يقوم بدونها العقد.", a: false },
+            { q: "يخضع العامل الذي يؤدي أعمالا لحسابه الشخصي لأحكام قانون العمل.", a: false },
+            { q: "كفل الدستور المصري لكل مواطن الحق في التعليم المجاني في مراحله المختلفة، وجعله الزامياً في مراحله الأساسية.", a: true },
+            { q: "تمثل منظمة العفو الدولية إحدى المنظمات العالمية غير الحكومية العاملة في مجال حماية حقوق الإنسان", a: true },
+            { q: "تضمن قانون صولون بعض الحقوق الإرثية للطفل.", a: false }, // تم التعديل هنا للسؤال المكرر رقم 43
+            { q: "تتميز حقوق الإنسان بأنها حقوق قابلة للتنازل أو التصرف .", a: false },
+            { q: "لا تتمتع الدعاوى العمالية التي يرفعها العمال بالإعفاء من الرسوم القضائية، ورسوم الدمغة .", a: false },
+            { q: "أصدرت الجمعية العامة التابعة لهيئة الأمم المتحدة الاعلان العالمي لحقوق الإنسان عام ١٩٤٨.", a: true },
+            { q: "صدقت مصر على العهدين الدوليين لحقوق الإنسان لعام ١٩٦٦.", a: true },
+            { q: "قرر المجلس الاعلى لدول الحلفاء في عام ۱۹۲۰ في مؤتمر سان ريمو وضع فلسطين تحت الانتداب البريطاني", a: true },
+            { q: "يعتبر نظام الانتداب الدولي نوع من الاحتلال المقنع ابتدعته عصبة الأمم .", a: true },
+            { q: "يتكون مجلس الأمن الدولي من خمسة عشر عضوا، خمسة دائمون، وعشرة غير دائمين.", a: true },
+            { q: "تستلزم حقوق الإنسان الثقافية تمكينه من التمتع بفوائد التقدم العلمي، وحماية إنتاجه الفني أو العلمي أو الأدبي", a: true },
+            { q: "خلا الميثاق الافريقي لحقوق الإنسان والشعوب لسنة ۱۹۸1 من أي تنظيم لواجبات الفرد تجاه أسرته ومجتمعه ودولته .", a: false },
+            { q: "وضعت القدس تحت الوصاية الدولية، بقرار الجمعية العامة للامم المتحدة رقم ١۸1 لسنة ١٩٤٧.", a: true },
+            { q: "تمثل الجمعية العامة جهاز التداول ووضع السياسات والتمثيل في منظمة الأمم المتحدة.", a: true },
+            { q: "تمثل كتابة عقد العمل الفردي إحدى عناصر عقد العمل التي لا يقوم بدونها العقد.", a: false },
+            { q: "يخضع العامل الذي يؤدي أعمالا لحسابه الشخصي لأحكام قانون العمل.", a: false }
+        ];
+
+        const sections = {
+            'fill-in-blanks': {
+                data: fillInTheBlanksData,
+                containerId: 'fill-in-blanks-container',
+                render: renderFillInBlanks
+            },
+            'multiple-choice': {
+                data: multipleChoiceData,
+                containerId: 'multiple-choice-container',
+                render: renderMultipleChoice
+            },
+            'true-false': {
+                data: trueFalseData,
+                containerId: 'true-false-container',
+                render: renderTrueFalse
+            }
+        };
+
+        let activeSection = 'fill-in-blanks';
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.question-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.getElementById(`${sectionId}-section`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            document.getElementById(`${sectionId}-tab`).classList.add('active');
+            activeSection = sectionId;
+            sections[activeSection].render();
+        }
+
+        function renderFillInBlanks() {
+            const container = document.getElementById('fill-in-blanks-container');
+            container.innerHTML = '';
+            fillInTheBlanksData.forEach((item, index) => {
+                const questionCard = document.createElement('div');
+                questionCard.className = 'card';
+                questionCard.innerHTML = `
+                    <p class="question-text">${index + 1}- ${item.q.replace('.........', '_______')}</p>
+                    <button class="answer-button" data-index="${index}">عرض الإجابة</button>
+                    <p class="answer-text" id="fib-answer-${index}">الإجابة: ${item.a}</p>
+                `;
+                container.appendChild(questionCard);
+            });
+
+            container.querySelectorAll('.answer-button').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const index = event.target.dataset.index;
+                    document.getElementById(`fib-answer-${index}`).style.display = 'block';
+                    event.target.style.display = 'none'; // Hide button after click
+                });
+            });
+        }
+
+        function renderMultipleChoice() {
+            const container = document.getElementById('multiple-choice-container');
+            container.innerHTML = '';
+            multipleChoiceData.forEach((item, index) => {
+                const questionCard = document.createElement('div');
+                questionCard.className = 'card';
+                questionCard.id = `mcq-card-${index}`; // Add ID for individual card feedback
+                let optionsHtml = '';
+                item.options.forEach((option, optIndex) => {
+                    optionsHtml += `
+                        <div class="mcq-option">
+                            <input type="radio" id="mcq-${index}-opt-${optIndex}" name="mcq-${index}" value="${option}" class="ml-2">
+                            <label for="mcq-${index}-opt-${optIndex}">${option}</label>
+                        </div>
+                    `;
+                });
+                questionCard.innerHTML = `
+                    <p class="question-text">${index + 1}- ${item.q}</p>
+                    <div class="mb-4">${optionsHtml}</div>
+                    <button class="answer-button" data-index="${index}" onclick="showMcqAnswer(${index})">عرض الإجابة</button>
+                    <p class="answer-text" id="mcq-correct-answer-${index}"></p> <div class="question-feedback" id="mcq-feedback-${index}"></div>
+                `;
+                container.appendChild(questionCard);
+            });
+
+            // Attach event listener to the "Check All MCQ" button
+            document.getElementById('check-all-mcq').onclick = checkAllMcqAnswers;
+        }
+
+        function showMcqAnswer(index) {
+            const item = multipleChoiceData[index];
+            const selectedOption = document.querySelector(`input[name="mcq-${index}"]:checked`);
+            const answerDisplay = document.getElementById(`mcq-correct-answer-${index}`);
+            
+            answerDisplay.style.display = 'block';
+            answerDisplay.textContent = `الإجابة الصحيحة: ${item.correct}`;
+
+            if (selectedOption && selectedOption.value === item.correct) {
+                answerDisplay.textContent += ' 🎉'; // Add celebration if user's selection is correct
+                answerDisplay.classList.remove('incorrect-answer-highlight'); // Ensure it's not red if correct
+                answerDisplay.classList.add('correct-answer-highlight'); // Make it green if correct
+            } else {
+                answerDisplay.classList.remove('correct-answer-highlight');
+                answerDisplay.classList.add('incorrect-answer-highlight'); // Make it red if incorrect
+            }
+        }
+
+        function checkAllMcqAnswers() {
+            let score = 0;
+            const totalQuestions = multipleChoiceData.length;
+            multipleChoiceData.forEach((item, index) => {
+                const selectedOption = document.querySelector(`input[name="mcq-${index}"]:checked`);
+                const feedbackDisplay = document.getElementById(`mcq-feedback-${index}`);
+                const answerDisplay = document.getElementById(`mcq-correct-answer-${index}`); // Get reference to answer text element
+                
+                feedbackDisplay.textContent = ''; // Clear previous feedback
+                feedbackDisplay.className = 'question-feedback'; // Reset class
+
+                // Reset answer display styling
+                answerDisplay.classList.remove('correct-answer-highlight', 'incorrect-answer-highlight');
+                answerDisplay.style.display = 'none'; // Hide it initially for fresh check
+
+                if (!selectedOption) {
+                    feedbackDisplay.textContent = 'الرجاء اختيار إجابة لهذا السؤال.';
+                    feedbackDisplay.classList.add('incorrect-answer-highlight');
+                    // Show correct answer in red if user didn't select anything
+                    answerDisplay.textContent = `الإجابة الصحيحة: ${item.correct}`;
+                    answerDisplay.style.display = 'block';
+                    answerDisplay.classList.add('incorrect-answer-highlight');
+                    return;
+                }
+
+                if (selectedOption.value === item.correct) {
+                    score++;
+                    feedbackDisplay.textContent = 'إجابة صحيحة! 🎉'; // Added celebration emoji
+                    feedbackDisplay.classList.add('correct-answer-highlight');
+                } else {
+                    feedbackDisplay.textContent = `إجابة خاطئة. الإجابة الصحيحة هي: ${item.correct}`; // Specific feedback for incorrect
+                    feedbackDisplay.classList.add('incorrect-answer-highlight');
+                    // Show correct answer in red
+                    answerDisplay.textContent = `الإجابة الصحيحة: ${item.correct}`;
+                    answerDisplay.style.display = 'block';
+                    answerDisplay.classList.add('incorrect-answer-highlight');
+                }
+            });
+            document.getElementById('mcq-score-display').textContent = `لقد حصلت على ${score} من ${totalQuestions} إجابات صحيحة.`;
+            document.getElementById('mcq-score-display').classList.add('correct-answer-highlight');
+        }
+
+
+        function renderTrueFalse() {
+            const container = document.getElementById('true-false-container');
+            container.innerHTML = '';
+            trueFalseData.forEach((item, index) => {
+                const questionCard = document.createElement('div');
+                questionCard.className = 'card';
+                questionCard.id = `tf-card-${index}`; // Add ID for individual card feedback
+                const answerText = item.a ? 'صحيح (√)' : 'خطأ (X)';
+                questionCard.innerHTML = `
+                    <p class="question-text">${index + 1}- ${item.q}</p>
+                    <div class="mb-4">
+                        <input type="radio" id="tf-${index}-true" name="tf-${index}" value="true" class="ml-2">
+                        <label for="tf-${index}-true">صحيح</label>
+                        <input type="radio" id="tf-${index}-false" name="tf-${index}" value="false" class="ml-2 mr-4">
+                        <label for="tf-${index}-false">خطأ</label>
+                    </div>
+                    <button class="answer-button" data-index="${index}" onclick="showTfAnswer(${index})">عرض الإجابة</button>
+                    <p class="answer-text" id="tf-answer-${index}"></p> <div class="question-feedback" id="tf-feedback-${index}"></div>
+                `;
+                container.appendChild(questionCard);
+            });
+
+            // Attach event listener to the "Check All TF" button
+            document.getElementById('check-all-tf').onclick = checkAllTfAnswers;
+        }
+
+        function showTfAnswer(index) {
+            const item = trueFalseData[index];
+            const selectedOption = document.querySelector(`input[name="tf-${index}"]:checked`);
+            const answerDisplay = document.getElementById(`tf-answer-${index}`);
+            
+            const correctAnswerText = item.a ? 'صحيح (√)' : 'خطأ (X)';
+            answerDisplay.style.display = 'block';
+            answerDisplay.textContent = `الإجابة: ${correctAnswerText}`;
+
+            if (selectedOption) {
+                const isCorrect = (selectedOption.value === 'true' && item.a === true) || (selectedOption.value === 'false' && item.a === false);
+                if (isCorrect) {
+                    answerDisplay.textContent += ' 🎉'; // Add celebration if user's selection is correct
+                    answerDisplay.classList.remove('incorrect-answer-highlight'); // Ensure it's not red if correct
+                    answerDisplay.classList.add('correct-answer-highlight'); // Make it green if correct
+                } else {
+                    answerDisplay.classList.remove('correct-answer-highlight');
+                    answerDisplay.classList.add('incorrect-answer-highlight'); // Make it red if incorrect
+                }
+            } else {
+                // If no option selected, just show the answer in default blue
+                answerDisplay.classList.remove('correct-answer-highlight', 'incorrect-answer-highlight');
+            }
+        }
+
+        function checkAllTfAnswers() {
+            let score = 0;
+            const totalQuestions = trueFalseData.length;
+            trueFalseData.forEach((item, index) => {
+                const selectedOption = document.querySelector(`input[name="tf-${index}"]:checked`);
+                const feedbackDisplay = document.getElementById(`tf-feedback-${index}`);
+                const answerDisplay = document.getElementById(`tf-answer-${index}`); // Get reference to answer text element
+
+                feedbackDisplay.textContent = ''; // Clear previous feedback
+                feedbackDisplay.className = 'question-feedback'; // Reset class
+
+                // Reset answer display styling
+                answerDisplay.classList.remove('correct-answer-highlight', 'incorrect-answer-highlight');
+                answerDisplay.style.display = 'none'; // Hide it initially for fresh check
+
+                if (!selectedOption) {
+                    feedbackDisplay.textContent = 'الرجاء اختيار إجابة لهذا السؤال.';
+                    feedbackDisplay.classList.add('incorrect-answer-highlight');
+                    // Show correct answer in red if user didn't select anything
+                    const correctAnswerText = item.a ? 'صحيح (√)' : 'خطأ (X)';
+                    answerDisplay.textContent = `الإجابة: ${correctAnswerText}`;
+                    answerDisplay.style.display = 'block';
+                    answerDisplay.classList.add('incorrect-answer-highlight');
+                    return;
+                }
+
+                const isCorrect = (selectedOption.value === 'true' && item.a === true) || (selectedOption.value === 'false' && item.a === false);
+
+                if (isCorrect) {
+                    score++;
+                    feedbackDisplay.textContent = 'إجابة صحيحة! 🎉'; // Added celebration emoji
+                    feedbackDisplay.classList.add('correct-answer-highlight');
+                } else {
+                    const correctAnswerText = item.a ? 'صحيح' : 'خطأ';
+                    feedbackDisplay.textContent = `إجابة خاطئة. الإجابة الصحيحة هي: ${correctAnswerText}`; // Specific feedback for incorrect
+                    feedbackDisplay.classList.add('incorrect-answer-highlight');
+                    // Show correct answer in red
+                    const actualCorrectAnswerText = item.a ? 'صحيح (√)' : 'خطأ (X)';
+                    answerDisplay.textContent = `الإجابة: ${actualCorrectAnswerText}`;
+                    answerDisplay.style.display = 'block';
+                    answerDisplay.classList.add('incorrect-answer-highlight');
+                }
+            });
+            document.getElementById('tf-score-display').textContent = `لقد حصلت على ${score} من ${totalQuestions} إجابات صحيحة.`;
+            document.getElementById('tf-score-display').classList.add('correct-answer-highlight');
+        }
+
+
+        document.getElementById('fill-in-blanks-tab').addEventListener('click', () => showSection('fill-in-blanks'));
+        document.getElementById('multiple-choice-tab').addEventListener('click', () => showSection('multiple-choice'));
+        document.getElementById('true-false-tab').addEventListener('click', () => showSection('true-false'));
+
+        // Initial render
+        document.addEventListener('DOMContentLoaded', () => {
+            showSection('fill-in-blanks');
+        });
+    </script>
+</body>
+</html>
